@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
 import BatchLibraryView from '../views/BatchLibraryView.vue'
 import TaskBoardView from '../views/TaskBoardView.vue'
+import AllocationView from '../views/AllocationView.vue'
 
 const routes = [
   {
@@ -19,6 +20,11 @@ const routes = [
     path: '/tasks',
     name: 'tasks',
     component: TaskBoardView,
+  },
+  {
+    path: '/allocation',
+    name: 'allocation',
+    component: AllocationView,
   },
 ]
 

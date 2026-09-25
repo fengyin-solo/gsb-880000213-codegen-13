@@ -16,7 +16,7 @@ import { restorationNavigation } from './data/restorationData'
       <AppHeader
         eyebrow="Studio Console"
         title="文献修复流程工作台"
-        description="补齐路由、视图、业务组件、数据层和工具函数，让这个项目更像一个能持续迭代的正式前端仓库。"
+        description="集中看待分配任务、修复师在办量与可用时段；具备分配权限的协调员可落单、裁定双认领并回退，查看者只读建议。"
       />
       <RouterView />
     </div>

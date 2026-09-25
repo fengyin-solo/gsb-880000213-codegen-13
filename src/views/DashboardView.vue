@@ -11,15 +11,23 @@ import {
   restorationSteps,
 } from '../data/restorationData'
 import { useRestorationOverview } from '../composables/useRestorationOverview'
+import { useAssignmentStore } from '../composables/useAssignmentStore'
 
-const { batchCount, environmentCount, highRiskCount, ownerCount } =
-  useRestorationOverview()
+const {
+  batchCount,
+  highRiskCount,
+  ownerCount,
+  environmentCount,
+  pendingCount,
+} = useRestorationOverview()
+
+const { ownerLoads, archivedTasks } = useAssignmentStore()
 
 const statCards = [
   { label: '在册批次', value: batchCount.value },
+  { label: '待分配任务', value: pendingCount.value },
   { label: '高风险任务', value: highRiskCount.value },
-  { label: '环境指标', value: environmentCount.value },
-  { label: '参与修复师', value: ownerCount.value },
+  { label: '在办修复师', value: ownerCount.value },
 ]
 </script>
 
@@ -35,6 +43,27 @@ const statCards = [
         :value="card.value"
       />
     </section>
+
+    <PanelSection title="负责人负载" badge="与任务清单同源">
+      <div class="owner-load">
+        <div v-for="entry in ownerLoads" :key="entry.restorer.id" class="owner-row">
+          <div class="owner-meta">
+            <span class="owner-name">{{ entry.restorer.name }}</span>
+            <span v-if="!entry.restorer.active" class="owner-tag owner-tag--off">已停用</span>
+          </div>
+          <div class="owner-bar">
+            <span
+              class="owner-bar-fill"
+              :style="{ width: `${Math.min(entry.activeCount * 25, 100)}%` }"
+            />
+          </div>
+          <strong class="owner-count">{{ entry.activeCount }} 件在办</strong>
+        </div>
+        <p class="owner-note">
+          已停用修复师不参与新任务分配；历史归档 {{ archivedTasks.length }} 件仍显示原负责人。
+        </p>
+      </div>
+    </PanelSection>
 
     <section class="two-column">
       <PanelSection title="重点批次" badge="优先处理">
@@ -66,6 +95,66 @@ const statCards = [
   gap: 16px;
 }
 
+.owner-load {
+  display: grid;
+  gap: 12px;
+}
+
+.owner-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 90px;
+  align-items: center;
+  gap: 14px;
+}
+
+.owner-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.owner-name {
+  font-weight: 700;
+}
+
+.owner-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-style: normal;
+}
+
+.owner-tag--off {
+  background: #e7e0d3;
+  color: #6f6049;
+}
+
+.owner-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(79, 57, 32, 0.1);
+  overflow: hidden;
+}
+
+.owner-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a97c45, #6f5028);
+  transition: width 0.3s ease;
+}
+
+.owner-count {
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.owner-note {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #82684b;
+}
+
 .two-column {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -86,6 +175,15 @@ const statCards = [
   .stats-grid,
   .two-column {
     grid-template-columns: 1fr;
+  }
+
+  .owner-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .owner-count {
+    text-align: left;
   }
 }
 </style>
