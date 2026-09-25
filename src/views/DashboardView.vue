@@ -1,9 +1,12 @@
 <script setup>
+import { computed } from 'vue'
+
 import PanelSection from '../components/common/PanelSection.vue'
 import StatCard from '../components/common/StatCard.vue'
 import BatchGrid from '../components/restoration/BatchGrid.vue'
 import EnvironmentCards from '../components/restoration/EnvironmentCards.vue'
 import HeroBanner from '../components/restoration/HeroBanner.vue'
+import OwnerLoadList from '../components/restoration/OwnerLoadList.vue'
 import {
   restorationBatches,
   restorationEnvironment,
@@ -11,16 +14,21 @@ import {
   restorationSteps,
 } from '../data/restorationData'
 import { useRestorationOverview } from '../composables/useRestorationOverview'
+import { useAssignmentStore } from '../composables/useAssignmentStore'
 
-const { batchCount, environmentCount, highRiskCount, ownerCount } =
+const { batchCount, environmentCount, highRiskCount, ownerCount, pendingCount, activeCount } =
   useRestorationOverview()
 
-const statCards = [
+const { ownerLoads, slots } = useAssignmentStore()
+
+// 统计随共享 store 实时更新，落单 / 回退后工作台与任务清单数字一致。
+const statCards = computed(() => [
   { label: '在册批次', value: batchCount.value },
+  { label: '待分配任务', value: pendingCount.value },
+  { label: '当前在办', value: activeCount.value },
   { label: '高风险任务', value: highRiskCount.value },
-  { label: '环境指标', value: environmentCount.value },
   { label: '参与修复师', value: ownerCount.value },
-]
+])
 </script>
 
 <template>
@@ -48,6 +56,13 @@ const statCards = [
       </PanelSection>
     </section>
 
+    <PanelSection
+      title="负责人当前负载"
+      badge="与任务清单同源 · 分配后实时一致"
+    >
+      <OwnerLoadList :loads="ownerLoads" :slots="slots" />
+    </PanelSection>
+
     <PanelSection title="环境参数" badge="修复室 2">
       <EnvironmentCards :items="restorationEnvironment" />
     </PanelSection>
@@ -62,7 +77,7 @@ const statCards = [
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
 }
 
